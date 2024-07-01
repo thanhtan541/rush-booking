@@ -47,9 +47,15 @@ mod tests {
     #[test]
     fn valid_hotel_category_is_accepted() {
         let host_category = "hotel";
-        assert!(matches!(HostCategory::parse(host_category).unwrap(), HostCategory::Hotel));
+        assert!(matches!(
+            HostCategory::parse(host_category).unwrap(),
+            HostCategory::Hotel
+        ));
 
         let host_category = "guest_house";
-        assert!(matches!(HostCategory::parse(host_category).unwrap(), HostCategory::GuestHouse));
+        assert!(matches!(
+            HostCategory::parse(host_category).unwrap(),
+            HostCategory::GuestHouse
+        ));
     }
 }

@@ -8,11 +8,30 @@ path = "src/lib.rs"
 
 [[bin]]
 path = "src/main.rs"
-name = "rush-booking"
+name = "rush_booking"
 
 [dependencies]
+# Async runtime
+tokio = { version = "1.38.0", features = ["macros", "rt-multi-thread"] }
+# Application
 actix-web = "4"
+# Env configuration
+config = "0.13"
+# Error handler
+anyhow = "1"
+# Data formatter
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1"
+serde-aux = "4"
+secrecy = { version = "0.8", features = ["serde"] }
+# Data handler
+validator = "0.16"
+unicode-segmentation = "1"
 
 [dev-dependencies]
+# Assert pretty
 claims = "0.7"
+# Generate data for Property-based testing
 fake = "~2.3"
+# Data for table-testing
+quickcheck = "0.9.2"
