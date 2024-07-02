@@ -1,5 +1,5 @@
 [package]
-name = "rush-booking"
+name = "rush_booking"
 version = "0.1.0"
 edition = "2021"
 
@@ -19,6 +19,13 @@ actix-web = "4"
 config = "0.13"
 # Error handler
 anyhow = "1"
+# Telemetry
+tracing = { version = "0.1", features = ["log"] }
+tracing-subscriber = { version = "0.3", features = ["registry", "env-filter"] }
+tracing-bunyan-formatter = "0.3"
+tracing-log = "0.1"
+once_cell = "1"
+tracing-actix-web = "0.7"
 # Data formatter
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1"

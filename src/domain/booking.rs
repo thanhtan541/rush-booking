@@ -24,7 +24,7 @@ impl HostCategory {
     }
 }
 
-struct Room {
+pub struct Room {
     pub container: Host,
     pub description: String,
     // Assumption that total beds is small

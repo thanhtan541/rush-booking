@@ -4,6 +4,7 @@ use actix_web::{
     App, HttpServer,
 };
 use std::{io::Error, net::TcpListener};
+use tracing_actix_web::TracingLogger;
 
 use crate::{
     configuration::Settings,
@@ -49,6 +50,9 @@ async fn run(listener: TcpListener, base_url: String) -> Result<Server, anyhow::
     let base_url = Data::new(ApplicationBaseUrl(base_url));
     let server = HttpServer::new(move || {
         App::new()
+            // Logger middleware
+            // Sent active-web log to log subscriber
+            .wrap(TracingLogger::default())
             .service(health_check)
             .service(web::scope("/admin").service(list_rooms))
             .app_data(base_url.clone())
