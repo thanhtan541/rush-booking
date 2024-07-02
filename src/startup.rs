@@ -3,11 +3,15 @@ use actix_web::{
     web::{self, Data},
     App, HttpServer,
 };
+use sqlx::{
+    postgres::{PgConnectOptions, PgPoolOptions},
+    PgPool,
+};
 use std::{io::Error, net::TcpListener};
 use tracing_actix_web::TracingLogger;
 
 use crate::{
-    configuration::Settings,
+    configuration::{DatabaseSettings, Settings},
     routes::{health_check, list_rooms},
 };
 
@@ -28,7 +32,14 @@ impl Application {
             configuration.application.port
         ));
         let port = listener.local_addr().unwrap().port();
-        let server = run(listener, configuration.application.base_url).await?;
+        let connection_pool = get_connection_pool(&configuration.database);
+
+        let server = run(
+            listener,
+            configuration.application.base_url,
+            connection_pool,
+        )
+        .await?;
 
         Ok(Self { port, server })
     }
@@ -42,12 +53,13 @@ impl Application {
     }
 }
 
-// pub fn get_connection_pool(configuration: &DatabaseSettings) -> PgPool {
-//     PgPoolOptions::new().connect_lazy_with(configuration.with_db())
-// }
-
-async fn run(listener: TcpListener, base_url: String) -> Result<Server, anyhow::Error> {
+async fn run(
+    listener: TcpListener,
+    base_url: String,
+    db_pool: PgPool,
+) -> Result<Server, anyhow::Error> {
     let base_url = Data::new(ApplicationBaseUrl(base_url));
+    let db_pool = Data::new(db_pool);
     let server = HttpServer::new(move || {
         App::new()
             // Logger middleware
@@ -56,8 +68,13 @@ async fn run(listener: TcpListener, base_url: String) -> Result<Server, anyhow::
             .service(health_check)
             .service(web::scope("/admin").service(list_rooms))
             .app_data(base_url.clone())
+            .app_data(db_pool.clone())
     })
     .listen(listener)?
     .run();
     Ok(server)
+}
+
+pub fn get_connection_pool(configuration: &DatabaseSettings) -> PgPool {
+    PgPoolOptions::new().connect_lazy_with(configuration.with_db())
 }

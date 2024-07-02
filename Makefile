@@ -49,6 +49,19 @@ test-log:
 	export TEST_LOG=true
 	cargo test ${PATTERN} | bunyan
 
+# slqx cli is requied
+# cargo install --version="~0.7" sqlx-cli --no-default-features \
+  --features rustls,postgres
+# Expose databse url for local developement
+# export DATABASE_URL=postgres://postgres:password@127.0.0.1:5432/rush_booking
+
+init-db:
+	./scripts/init_db.sh
+
+init-sqlx-offline:
+	export DATABASE_URL=postgres://postgres:password@127.0.0.1:5432/hotel_booking
+	cargo sqlx prepare --workspace
+
 MIGRATION?="update_db"
 add-migration:
 	sqlx migrate add $(MIGRATION)

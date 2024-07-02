@@ -35,6 +35,19 @@ secrecy = { version = "0.8", features = ["serde"] }
 validator = "0.16"
 unicode-segmentation = "1"
 
+# Database connection
+[dependencies.sqlx]
+version = "0.7"
+default-features = false
+features = [
+    "runtime-tokio-rustls",
+    "macros",
+    "postgres",
+    "uuid",
+    "chrono",
+    "migrate",
+]
+
 [dev-dependencies]
 # Assert pretty
 claims = "0.7"
