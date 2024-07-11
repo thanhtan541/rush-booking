@@ -48,6 +48,13 @@ features = [
     "migrate",
 ]
 
+# Http client
+[dependencies.reqwest]
+version = "0.11"
+default-features = false
+# We need the `json` feature flag to serialize/deserialize JSON payloads
+features = ["json", "rustls-tls", "cookies"]
+
 [dev-dependencies]
 # Assert pretty
 claims = "0.7"
@@ -55,3 +62,4 @@ claims = "0.7"
 fake = "~2.3"
 # Data for table-testing
 quickcheck = "0.9.2"
+quickcheck_macros = "0.9.1"
