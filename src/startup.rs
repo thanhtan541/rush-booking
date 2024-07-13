@@ -3,16 +3,13 @@ use actix_web::{
     web::{self, Data},
     App, HttpServer,
 };
-use sqlx::{
-    postgres::{PgConnectOptions, PgPoolOptions},
-    PgPool,
-};
+use sqlx::{postgres::PgPoolOptions, PgPool};
 use std::{io::Error, net::TcpListener};
 use tracing_actix_web::TracingLogger;
 
 use crate::{
     configuration::{DatabaseSettings, Settings},
-    routes::{health_check, list_rooms},
+    routes::{add_rooms, get_hosts, add_hosts, health_check, list_rooms},
 };
 
 pub struct ApplicationBaseUrl(pub String);
@@ -66,7 +63,13 @@ async fn run(
             // Sent active-web log to log subscriber
             .wrap(TracingLogger::default())
             .service(health_check)
-            .service(web::scope("/admin").service(list_rooms))
+            .service(
+                web::scope("/admin")
+                    .service(get_hosts)
+                    .service(add_hosts)
+                    .service(list_rooms)
+                    .service(add_rooms),
+            )
             .app_data(base_url.clone())
             .app_data(db_pool.clone())
     })

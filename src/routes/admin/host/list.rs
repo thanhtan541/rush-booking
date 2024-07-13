@@ -7,9 +7,9 @@ use crate::{
     services::get_all_rooms_for_hotel,
 };
 
-#[tracing::instrument(name = "Get list of rooms")]
-#[get("/rooms")]
-pub async fn list_rooms(pool: web::Data<PgPool>) -> Result<HttpResponse, actix_web::Error> {
+#[tracing::instrument(name = "Get list of hosts")]
+#[get("/hosts")]
+pub async fn list_hosts(pool: web::Data<PgPool>) -> Result<HttpResponse, actix_web::Error> {
     match get_rooms(&pool).await {
         Ok(_rooms) => Ok(HttpResponse::Ok().finish()),
         Err(_) => Ok(HttpResponse::Ok().finish()),

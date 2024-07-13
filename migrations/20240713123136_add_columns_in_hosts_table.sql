@@ -1,0 +1,2 @@
+ALTER TABLE hosts
+ADD category TEXT NOT NULL;
