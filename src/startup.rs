@@ -9,7 +9,7 @@ use tracing_actix_web::TracingLogger;
 
 use crate::{
     configuration::{DatabaseSettings, Settings},
-    routes::{add_rooms, get_hosts, add_hosts, health_check, list_rooms},
+    routes::{add_hosts, add_rooms, get_hosts, health_check, list_rooms},
 };
 
 pub struct ApplicationBaseUrl(pub String);
