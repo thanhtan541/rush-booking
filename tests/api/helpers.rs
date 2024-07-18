@@ -1,4 +1,5 @@
-use rush_booking::{configuration::get_configuration, startup::Application};
+use rush_booking::{configuration::get_configuration, startup::Application, utils::ResponseData};
+use uuid::Uuid;
 
 pub struct TestApp {
     pub address: String,
@@ -59,4 +60,10 @@ pub async fn spawn_app() -> TestApp {
         port,
         api_client,
     }
+}
+
+pub async fn get_response_data_from_json(res: reqwest::Response) -> ResponseData<Uuid> {
+    res.json::<ResponseData<Uuid>>()
+        .await
+        .expect("Unexpected response format")
 }

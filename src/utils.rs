@@ -34,7 +34,7 @@ pub fn error_chain_fmt(
     Ok(())
 }
 
-#[derive(serde::Serialize)]
+#[derive(serde::Serialize, serde::Deserialize)]
 pub struct ResponseData<T> {
     pub data: T,
     pub message: String,

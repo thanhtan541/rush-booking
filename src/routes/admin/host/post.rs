@@ -65,7 +65,7 @@ pub async fn add_hosts(
         .context("Failed to acquire a Postgres connection from pool")?;
     let host_id = insert_host(&mut transaction, &new_host)
         .await
-        .context("Failed to insert new subscriber in the database.")?;
+        .context("Failed to insert new hpst in the database.")?;
     transaction
         .commit()
         .await

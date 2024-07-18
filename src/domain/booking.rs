@@ -30,7 +30,7 @@ impl AsRef<str> for GeneralName {
 pub struct Host {
     pub id: Uuid,
     pub category: HostCategory,
-    pub name: String,
+    pub name: GeneralName,
 }
 
 pub struct NewHost {
@@ -69,9 +69,18 @@ impl AsRef<str> for HostCategory {
 pub struct Room {
     pub id: Uuid,
     pub container: Host,
+    pub name: GeneralName,
     pub description: String,
     // Assumption that total beds is small
-    pub number_of_beds: u8,
+    pub number_of_beds: u16,
+}
+
+pub struct NewRoom {
+    pub host_id: Uuid,
+    pub name: GeneralName,
+    pub description: String,
+    // Assumption that total beds is small
+    pub number_of_beds: u16,
 }
 
 #[cfg(test)]

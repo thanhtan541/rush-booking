@@ -1,6 +1,6 @@
 use uuid::Uuid;
 
-use crate::domain::{Host, HostCategory, Room, RoomRepository};
+use crate::domain::{GeneralName, Host, HostCategory, Room, RoomRepository};
 
 pub struct RoomRepositoryImpl {
     _rooms: Option<Vec<Room>>,
@@ -17,9 +17,10 @@ impl RoomRepository for RoomRepositoryImpl {
         let rooms = vec![Room {
             container: Host {
                 category: HostCategory::parse("hotel").expect("Invalid hotel category"),
-                name: "InterContinental".to_string(),
+                name: GeneralName::parse("Intercontinentel".to_string())?,
                 id: Uuid::new_v4(),
             },
+            name: GeneralName::parse("Double beds room".to_string())?,
             number_of_beds: 2,
             description: "Double beds".to_string(),
             id: Uuid::new_v4(),
