@@ -1,0 +1,108 @@
+{
+	"info": {
+		"_postman_id": "3f0a8208-58e6-4be6-a903-c42d7060a629",
+		"name": "rush booking",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "getHostInfo",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/admin/hosts/123",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"admin",
+						"hosts",
+						"123"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "postHostInfor",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"something\",\n    \"category\": \"hotel\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/admin/hosts",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"admin",
+						"hosts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "postRoomInfor",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Double bed rooms\",\n    \"host_id\":\"9bac8fc0-a14c-4de6-93cd-79bf59200c12\",\n    \"description\": \"Double bed rooms with balcony\",\n    \"number_of_beds\": 2\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/admin/rooms",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"admin",
+						"rooms"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000"
+		}
+	]
+}
