@@ -1871,6 +1871,7 @@ version = "0.1.0"
 dependencies = [
  "actix-web",
  "anyhow",
+ "base64 0.22.1",
  "claims",
  "config",
  "fake",
@@ -1878,6 +1879,7 @@ dependencies = [
  "quickcheck",
  "quickcheck_macros",
  "reqwest",
+ "ring",
  "secrecy",
  "serde",
  "serde-aux",

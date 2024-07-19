@@ -96,3 +96,7 @@ cloud-apps:
 
 cloud-apps-db-migrate:
 	DATABASE_URL=postgresql://newsletter:AVNS_VaVs7648xubCMx8igZZ@app-c862bb64-6968-4be2-b722-b72609150f7b-do-user-16862819-0.c.db.ondigitalocean.com:25060/newsletter?sslmode=require sqlx migrate run
+
+# JWT
+jwt-keypair:
+	NO_SELF_SIGN_CERT=true NO_PFX_FORMAT=true ./scripts/init_keypair.sh

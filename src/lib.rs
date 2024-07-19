@@ -1,3 +1,4 @@
+pub mod authentication;
 pub mod configuration;
 mod domain;
 mod infrastructure;
