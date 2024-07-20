@@ -1,5 +1,3 @@
 /target
-private-key.der
-private-key.pem
-public-key.der
-public-key.pem
+private*.*
+public*.*

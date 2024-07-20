@@ -99,4 +99,4 @@ cloud-apps-db-migrate:
 
 # JWT
 jwt-keypair:
-	NO_SELF_SIGN_CERT=true NO_PFX_FORMAT=true ./scripts/init_keypair.sh
+	./scripts/init_jwt_keypair.sh

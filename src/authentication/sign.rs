@@ -1,73 +1,20 @@
-use std::u8;
-
 use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine as _};
 use ring::{rand::SystemRandom, rsa::KeyPair, signature};
-use serde::{Deserialize, Serialize};
 
-pub const DEFAULT_TOKEN_ALG: &str = "RS256";
-pub const DEFAULT_TOKEN_TYPE: &str = "JWT";
-pub const DEFAULT_TOKEN_TTL: u64 = 3600; // One hour
+use super::{
+    domain::{Header, Options, Payload},
+    error::MyError,
+};
 
-pub struct Options {
-    expired_in: u64, // In seconds
-}
-
-impl Options {
-    pub fn new() -> Self {
-        Self {
-            expired_in: DEFAULT_TOKEN_TTL,
-        }
-    }
-}
-
-#[derive(Deserialize, Serialize)]
-pub struct Header {
-    pub alg: String,
-    pub typ: String,
-}
-
-impl Header {
-    pub fn new() -> Self {
-        Self {
-            alg: DEFAULT_TOKEN_ALG.to_string(),
-            typ: DEFAULT_TOKEN_TYPE.to_string(),
-        }
-    }
-}
-
-/// See [the RFC 7519] for more.
-///
-/// [the link]: https://www.rfc-editor.org/rfc/rfc7519
-#[derive(Deserialize, Serialize)]
-pub struct Payload {
-    pub exp: u64, // 2. Terminology - NumericDate
-}
-
-impl Payload {
-    pub fn new() -> Self {
-        Self {
-            exp: get_expired_unix_timestamp(DEFAULT_TOKEN_TTL),
-        }
-    }
-}
-
-pub fn sign(payload: &str, secret: &str, options: Option<&Options>) -> String {
+pub fn sign(payload: &Payload, secret: &[u8], options: Option<&Options>) -> String {
     let header = serde_json::to_string(&Header::new()).unwrap();
     let encoded_header = URL_SAFE_NO_PAD.encode(header);
-    let payload = serde_json::to_string(&Payload::new()).unwrap();
+    let payload = serde_json::to_string(payload).unwrap();
     let encoded_payload = URL_SAFE_NO_PAD.encode(payload);
+    let signature = create_signature(secret, &encoded_header, &encoded_payload).unwrap();
+    let encoded_signature = URL_SAFE_NO_PAD.encode(signature);
 
-    let signature = create_signature(secret.as_bytes(), &encoded_header, &encoded_payload).unwrap();
-
-    let signature = String::from_utf8(signature).unwrap();
-
-    format!("{encoded_header}.{encoded_payload}.{signature}")
-}
-
-fn get_expired_unix_timestamp(next: u64) -> u64 {
-    let current: u64 = 1721400001;
-
-    current + next
+    format!("{encoded_header}.{encoded_payload}.{encoded_signature}")
 }
 
 fn create_signature(
@@ -75,10 +22,7 @@ fn create_signature(
     encoded_header: &str,
     encoded_payload: &str,
 ) -> Result<Vec<u8>, MyError> {
-    // Todo: Refactor
-    let private_key_path = std::path::Path::new("./private-key.der");
-    let private_key_der = read_file(private_key_path)?;
-    let key_pair = KeyPair::from_der(&private_key_der).map_err(|_| MyError::BadPrivateKey)?;
+    let key_pair = KeyPair::from_pkcs8(secret).map_err(|e| MyError::BadPrivateKey)?;
     let message = format!("{encoded_header}.{encoded_payload}");
     let rng = SystemRandom::new();
     let mut signature = vec![0; key_pair.public().modulus_len()];
@@ -94,12 +38,11 @@ fn create_signature(
     Ok(signature)
 }
 
-#[derive(Debug)]
-enum MyError {
-    IO(std::io::Error),
-    BadPrivateKey,
-    OOM,
-    BadSignature,
+pub fn get_private_key_pk8(path: &str) -> Result<Vec<u8>, MyError> {
+    let private_key_path = std::path::Path::new(path);
+    let private_key_pk8 = read_file(private_key_path)?;
+
+    Ok(private_key_pk8)
 }
 
 fn read_file(path: &std::path::Path) -> Result<Vec<u8>, MyError> {
@@ -110,4 +53,65 @@ fn read_file(path: &std::path::Path) -> Result<Vec<u8>, MyError> {
     file.read_to_end(&mut contents)
         .map_err(|e| MyError::IO(e))?;
     Ok(contents)
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::authentication::domain::{Options, Payload, TOKEN_DELIMETER};
+    use std::{thread, time::Duration};
+
+    #[test]
+    fn should_produce_different_signature_for_different_payloads() {
+        let payload_one = Payload::new("Jerry".into());
+        let payload_two = Payload::new("Tom".into());
+        let secret =
+            get_private_key_pk8("./private-key.pk8").expect("Failed to retrieve the private key");
+        let options = Options::new();
+        let jwt_one = sign(&payload_one, &secret, Some(&options));
+        let jwt_two = sign(&payload_two, &secret, Some(&options));
+
+        let sign_one = jwt_one.split(TOKEN_DELIMETER).collect::<Vec<&str>>()[2];
+        let sign_two = jwt_two.split(TOKEN_DELIMETER).collect::<Vec<&str>>()[2];
+
+        assert_ne!(sign_one, sign_two);
+    }
+
+    #[test]
+    fn should_produce_different_signature_for_same_payload_at_different_time() {
+        let payload_one = Payload::new("Tom".into());
+        // Wait for 1 second to create second payload
+        thread::sleep(Duration::from_secs(1));
+        let payload_two = Payload::new("Tom".into());
+        let secret =
+            get_private_key_pk8("./private-key.pk8").expect("Failed to retrieve the private key");
+        let options = Options::new();
+        let jwt_one = sign(&payload_one, &secret, Some(&options));
+        let jwt_two = sign(&payload_two, &secret, Some(&options));
+
+        let sign_one = jwt_one.split(TOKEN_DELIMETER).collect::<Vec<&str>>()[2];
+        let sign_two = jwt_two.split(TOKEN_DELIMETER).collect::<Vec<&str>>()[2];
+
+        assert_ne!(sign_one, sign_two);
+    }
+
+    #[test]
+    fn should_add_expiry_to_the_payload() {
+        let secret =
+            get_private_key_pk8("./private-key.pk8").expect("Failed to retrieve the private key");
+        let options = Options::new();
+        let payload_one = Payload::new("Tom".into());
+        let jwt_one = sign(&payload_one, &secret, Some(&options));
+
+        let payload_one = jwt_one.split(TOKEN_DELIMETER).collect::<Vec<&str>>()[1];
+        // Decode the payload and get "exp" key and its value is integer
+        let decoder = URL_SAFE_NO_PAD
+            .decode(payload_one)
+            .expect("Failed to decode payload string");
+        let payload_str = String::from_utf8(decoder).expect("Invalid UTF8 format");
+        let payload: Payload =
+            serde_json::from_str(&payload_str).expect("Failed to parse to Payload struct");
+
+        assert!(payload.exp > 0);
+    }
 }

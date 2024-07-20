@@ -1,4 +1,6 @@
 mod decode;
+mod domain;
+mod error;
 mod sign;
 mod verify;
 
