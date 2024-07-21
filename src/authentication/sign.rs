@@ -1,4 +1,7 @@
-use base64::{engine::{general_purpose::URL_SAFE_NO_PAD, GeneralPurpose}, Engine as _};
+use base64::{
+    engine::{general_purpose::URL_SAFE_NO_PAD, GeneralPurpose},
+    Engine as _,
+};
 use ring::{rand::SystemRandom, rsa::KeyPair, signature};
 
 use super::{
@@ -6,7 +9,7 @@ use super::{
     error::MyError,
 };
 
-static ENCODER: GeneralPurpose =URL_SAFE_NO_PAD; 
+static ENCODER: GeneralPurpose = URL_SAFE_NO_PAD;
 
 pub fn sign(payload: &Payload, secret: &[u8]) -> String {
     let header = serde_json::to_string(&Header::new()).unwrap();

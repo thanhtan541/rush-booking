@@ -9,7 +9,7 @@ impl CustomerEmail {
         if validate_email(&s) {
             Ok(Self(s))
         } else {
-            Err(format!("{} is not a valid subscriber email", s))
+            Err(format!("{} is not a valid customer email", s))
         }
     }
 }

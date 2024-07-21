@@ -1,4 +1,3 @@
-use std::u8;
 use unicode_segmentation::UnicodeSegmentation;
 use uuid::Uuid;
 
