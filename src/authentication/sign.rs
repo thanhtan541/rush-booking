@@ -1,18 +1,22 @@
-use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine as _};
+use base64::{engine::{general_purpose::URL_SAFE_NO_PAD, GeneralPurpose}, Engine as _};
 use ring::{rand::SystemRandom, rsa::KeyPair, signature};
 
 use super::{
-    domain::{Header, Options, Payload},
+    domain::{Header, Payload},
     error::MyError,
 };
 
-pub fn sign(payload: &Payload, secret: &[u8], options: Option<&Options>) -> String {
+static ENCODER: GeneralPurpose =URL_SAFE_NO_PAD; 
+
+pub fn sign(payload: &Payload, secret: &[u8]) -> String {
     let header = serde_json::to_string(&Header::new()).unwrap();
-    let encoded_header = URL_SAFE_NO_PAD.encode(header);
+    let encoded_header = ENCODER.encode(header);
+
     let payload = serde_json::to_string(payload).unwrap();
-    let encoded_payload = URL_SAFE_NO_PAD.encode(payload);
+    let encoded_payload = ENCODER.encode(payload);
+
     let signature = create_signature(secret, &encoded_header, &encoded_payload).unwrap();
-    let encoded_signature = URL_SAFE_NO_PAD.encode(signature);
+    let encoded_signature = ENCODER.encode(signature);
 
     format!("{encoded_header}.{encoded_payload}.{encoded_signature}")
 }
@@ -22,7 +26,7 @@ fn create_signature(
     encoded_header: &str,
     encoded_payload: &str,
 ) -> Result<Vec<u8>, MyError> {
-    let key_pair = KeyPair::from_pkcs8(secret).map_err(|e| MyError::BadPrivateKey)?;
+    let key_pair = KeyPair::from_pkcs8(secret).map_err(|_| MyError::BadPrivateKey)?;
     let message = format!("{encoded_header}.{encoded_payload}");
     let rng = SystemRandom::new();
     let mut signature = vec![0; key_pair.public().modulus_len()];
@@ -58,7 +62,7 @@ fn read_file(path: &std::path::Path) -> Result<Vec<u8>, MyError> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::authentication::domain::{Options, Payload, TOKEN_DELIMETER};
+    use crate::authentication::domain::{Payload, TOKEN_DELIMETER};
     use std::{thread, time::Duration};
 
     #[test]
@@ -67,9 +71,8 @@ mod test {
         let payload_two = Payload::new("Tom".into());
         let secret =
             get_private_key_pk8("./private-key.pk8").expect("Failed to retrieve the private key");
-        let options = Options::new();
-        let jwt_one = sign(&payload_one, &secret, Some(&options));
-        let jwt_two = sign(&payload_two, &secret, Some(&options));
+        let jwt_one = sign(&payload_one, &secret);
+        let jwt_two = sign(&payload_two, &secret);
 
         let sign_one = jwt_one.split(TOKEN_DELIMETER).collect::<Vec<&str>>()[2];
         let sign_two = jwt_two.split(TOKEN_DELIMETER).collect::<Vec<&str>>()[2];
@@ -85,9 +88,8 @@ mod test {
         let payload_two = Payload::new("Tom".into());
         let secret =
             get_private_key_pk8("./private-key.pk8").expect("Failed to retrieve the private key");
-        let options = Options::new();
-        let jwt_one = sign(&payload_one, &secret, Some(&options));
-        let jwt_two = sign(&payload_two, &secret, Some(&options));
+        let jwt_one = sign(&payload_one, &secret);
+        let jwt_two = sign(&payload_two, &secret);
 
         let sign_one = jwt_one.split(TOKEN_DELIMETER).collect::<Vec<&str>>()[2];
         let sign_two = jwt_two.split(TOKEN_DELIMETER).collect::<Vec<&str>>()[2];
@@ -99,9 +101,8 @@ mod test {
     fn should_add_expiry_to_the_payload() {
         let secret =
             get_private_key_pk8("./private-key.pk8").expect("Failed to retrieve the private key");
-        let options = Options::new();
         let payload_one = Payload::new("Tom".into());
-        let jwt_one = sign(&payload_one, &secret, Some(&options));
+        let jwt_one = sign(&payload_one, &secret);
 
         let payload_one = jwt_one.split(TOKEN_DELIMETER).collect::<Vec<&str>>()[1];
         // Decode the payload and get "exp" key and its value is integer

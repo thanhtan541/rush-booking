@@ -1,4 +1,4 @@
-use std::time::SystemTime;
+use std::time::{Duration, SystemTime};
 
 use serde::{Deserialize, Serialize};
 
@@ -38,17 +38,10 @@ impl Payload {
             exp: get_expired_unix_timestamp(DEFAULT_TOKEN_TTL),
         }
     }
-}
 
-pub struct Options {
-    expired_in: u64, // In seconds
-}
-
-impl Options {
-    pub fn new() -> Self {
-        Self {
-            expired_in: DEFAULT_TOKEN_TTL,
-        }
+    pub fn set_exp(mut self, ttl: Duration) -> Self {
+        self.exp = get_expired_unix_timestamp(ttl.as_secs());
+        self
     }
 }
 
@@ -57,9 +50,23 @@ pub struct Token {
     pub payload: Payload,
 }
 
+#[derive(Debug)]
+pub enum TokenError {
+    InvalidAlg,
+    InvalidTyp,
+    InvalidSignature,
+    Expired,
+    MissingRequiredClaims,
+    InvalidIssuer,
+}
+
 impl Token {
     pub fn new(header: Header, payload: Payload) -> Self {
         Self { header, payload }
+    }
+
+    pub fn is_expired(&self) -> bool {
+        self.payload.exp < get_sys_time_in_secs()
     }
 }
 
