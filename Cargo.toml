@@ -15,6 +15,7 @@ name = "rush_booking"
 tokio = { version = "1.38.0", features = ["macros", "rt-multi-thread"] }
 # Application
 actix-web = "4"
+actix-cors = "0.7.0"
 # Env configuration
 config = "0.13"
 # Error handler
