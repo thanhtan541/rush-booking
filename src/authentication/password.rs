@@ -6,7 +6,7 @@ use argon2::{
 use secrecy::{ExposeSecret, Secret};
 use sqlx::PgPool;
 
-use crate::{telemetry::spawn_blocking_with_tracing, domain::CustomerEmail};
+use crate::{domain::CustomerEmail, telemetry::spawn_blocking_with_tracing};
 
 #[derive(thiserror::Error, Debug)]
 pub enum AuthError {

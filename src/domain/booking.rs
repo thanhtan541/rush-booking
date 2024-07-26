@@ -1,7 +1,7 @@
 use unicode_segmentation::UnicodeSegmentation;
 use uuid::Uuid;
 
-#[derive(Debug)]
+#[derive(Debug, serde::Deserialize)]
 pub struct GeneralName(String);
 
 impl GeneralName {
@@ -19,6 +19,16 @@ impl GeneralName {
     }
 }
 
+impl serde::Serialize for GeneralName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let name = &self.0;
+        serializer.serialize_newtype_struct("name", &name)
+    }
+}
+
 impl AsRef<str> for GeneralName {
     fn as_ref(&self) -> &str {
         &self.0
@@ -26,6 +36,7 @@ impl AsRef<str> for GeneralName {
 }
 
 // Host is just a meta data of room, not really imnportant
+#[derive(serde::Deserialize, serde::Serialize)]
 pub struct Host {
     pub id: Uuid,
     pub category: HostCategory,
@@ -40,10 +51,19 @@ pub struct NewHost {
 // Different kind of romm's container
 // It can be belong to a hotel or local house
 // But not both
-#[derive(Debug)]
+#[derive(Debug, serde::Deserialize)]
 pub enum HostCategory {
     Hotel,
     GuestHouse,
+}
+
+impl serde::Serialize for HostCategory {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_newtype_struct("category", self.as_ref())
+    }
 }
 
 impl HostCategory {
@@ -65,6 +85,7 @@ impl AsRef<str> for HostCategory {
     }
 }
 
+#[derive(serde::Deserialize, serde::Serialize)]
 pub struct Room {
     pub id: Uuid,
     pub container: Host,

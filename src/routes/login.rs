@@ -1,9 +1,11 @@
 use actix_web::{http::header::ContentType, post, web, HttpResponse, ResponseError};
+use anyhow::anyhow;
 use reqwest::StatusCode;
 use secrecy::Secret;
 use sqlx::PgPool;
 
 use crate::{
+    authentication::{validate_credentials, AuthError, Credentials},
     domain::CustomerEmail,
     utils::{error_chain_fmt, ResponseData},
 };
@@ -11,11 +13,6 @@ use crate::{
 #[derive(serde::Deserialize)]
 struct BodyData {
     username: String,
-    password: Secret<String>,
-}
-
-struct Credentials {
-    username: CustomerEmail,
     password: Secret<String>,
 }
 
@@ -43,7 +40,26 @@ pub async fn login(
     body: web::Json<BodyData>,
     pool: web::Data<PgPool>,
 ) -> Result<HttpResponse, LoginError> {
-    let credentials: Credentials = body.0.try_into().map_err(LoginError::AuthError)?;
+    let credentials: Credentials = body
+        .0
+        .try_into()
+        .map_err(|_| LoginError::AuthError(anyhow!("Invalid credential")))?;
+
+    tracing::Span::current().record(
+        "username",
+        &tracing::field::display(&credentials.username.as_ref()),
+    );
+    let _user_id = match validate_credentials(credentials, &pool).await {
+        Ok(user_id) => {
+            tracing::Span::current().record("user_id", &tracing::field::display(&user_id));
+        }
+        Err(e) => {
+            let _e = match e {
+                AuthError::UnexpectedError(_) => LoginError::UnexpectedError(e.into()),
+                AuthError::InvalidCredentials(_) => LoginError::AuthError(e.into()),
+            };
+        }
+    };
 
     let data = ResponseData {
         data: "token",
@@ -58,8 +74,8 @@ pub async fn login(
 
 #[derive(thiserror::Error)]
 pub enum LoginError {
-    #[error("{0}")]
-    AuthError(String),
+    #[error("Authentication failed")]
+    AuthError(#[source] anyhow::Error),
     #[error(transparent)]
     UnexpectedError(#[from] anyhow::Error),
 }

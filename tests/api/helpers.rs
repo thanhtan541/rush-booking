@@ -1,5 +1,5 @@
-use rush_booking::{configuration::get_configuration, startup::Application, utils::ResponseData};
 use once_cell::sync::Lazy;
+use rush_booking::{configuration::get_configuration, startup::Application, utils::ResponseData};
 use uuid::Uuid;
 
 static TRACING: Lazy<()> = Lazy::new(|| {

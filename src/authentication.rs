@@ -1,12 +1,12 @@
 mod decode;
 mod domain;
 mod error;
+mod password;
 mod sign;
 mod verify;
-mod password;
 
 pub use decode::*;
 pub use domain::*;
+pub use password::*;
 pub use sign::*;
 pub use verify::*;
-pub use password::*;
