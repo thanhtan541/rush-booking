@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "3f0a8208-58e6-4be6-a903-c42d7060a629",
+		"_postman_id": "771580db-d461-4ea2-9c16-1c9bdcd0db40",
 		"name": "rush booking",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -8,6 +8,16 @@
 		{
 			"name": "getHostInfo",
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "sdfsf",
+							"type": "string"
+						}
+					]
+				},
 				"method": "GET",
 				"header": [],
 				"url": {
@@ -19,6 +29,34 @@
 						"admin",
 						"hosts",
 						"123"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getRooms",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "sdfsf",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/admin/rooms",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"admin",
+						"rooms"
 					]
 				}
 			},
@@ -73,6 +111,32 @@
 					"path": [
 						"admin",
 						"rooms"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"admin@tdog.com\",\n    \"password\": \"pikapikapikachu\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/login",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"login"
 					]
 				}
 			},
