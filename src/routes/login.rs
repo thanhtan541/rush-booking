@@ -1,4 +1,6 @@
-use actix_web::{http::header::ContentType, post, web, HttpResponse, ResponseError};
+use actix_web::{
+    error::InternalError, http::header::ContentType, post, web, HttpResponse, ResponseError,
+};
 use anyhow::anyhow;
 use reqwest::StatusCode;
 use secrecy::Secret;
@@ -39,37 +41,48 @@ impl TryFrom<BodyData> for Credentials {
 pub async fn login(
     body: web::Json<BodyData>,
     pool: web::Data<PgPool>,
-) -> Result<HttpResponse, LoginError> {
-    let credentials: Credentials = body
-        .0
-        .try_into()
-        .map_err(|_| LoginError::AuthError(anyhow!("Invalid credential")))?;
+) -> Result<HttpResponse, InternalError<LoginError>> {
+    let credentials: Credentials = body.0.try_into().map_err(|_| {
+        InternalError::new(
+            LoginError::AuthError(anyhow!("Invalid credential")),
+            StatusCode::BAD_REQUEST,
+        )
+    })?;
 
     tracing::Span::current().record(
         "username",
         &tracing::field::display(&credentials.username.as_ref()),
     );
-    let _user_id = match validate_credentials(credentials, &pool).await {
+    match validate_credentials(credentials, &pool).await {
         Ok(user_id) => {
             tracing::Span::current().record("user_id", &tracing::field::display(&user_id));
+            let data = ResponseData {
+                data: "token",
+                code: StatusCode::OK.as_u16(),
+                message: format!("Successfully fetch token"),
+            };
+
+            Ok(HttpResponse::Ok()
+                .content_type(ContentType::json())
+                .json(data))
         }
         Err(e) => {
-            let _e = match e {
+            let e = match e {
                 AuthError::UnexpectedError(_) => LoginError::UnexpectedError(e.into()),
                 AuthError::InvalidCredentials(_) => LoginError::AuthError(e.into()),
             };
+            let data = ResponseData {
+                data: "",
+                code: StatusCode::BAD_REQUEST.as_u16(),
+                message: format!("Invalid credentials"),
+            };
+
+            let response = HttpResponse::BadRequest()
+                .content_type(ContentType::json())
+                .json(data);
+            Err(InternalError::from_response(e, response))
         }
-    };
-
-    let data = ResponseData {
-        data: "token",
-        code: StatusCode::OK.as_u16(),
-        message: format!("Successfully login"),
-    };
-
-    Ok(HttpResponse::Ok()
-        .content_type(ContentType::json())
-        .json(data))
+    }
 }
 
 #[derive(thiserror::Error)]

@@ -1,7 +1,7 @@
 use actix_cors::Cors;
 use actix_web::{
     dev::Server,
-    web::{self, Data},
+    web::{self, service, Data},
     App, HttpServer,
 };
 use sqlx::{postgres::PgPoolOptions, PgPool};
@@ -10,7 +10,7 @@ use tracing_actix_web::TracingLogger;
 
 use crate::{
     configuration::{DatabaseSettings, Settings},
-    routes::{add_hosts, add_rooms, get_hosts, health_check, list_rooms},
+    routes::{add_hosts, add_rooms, get_hosts, health_check, list_rooms, login},
 };
 
 pub struct ApplicationBaseUrl(pub String);
@@ -74,6 +74,7 @@ async fn run(
             .wrap(TracingLogger::default())
             .wrap(cors)
             .service(health_check)
+            .service(login)
             .service(
                 web::scope("/admin")
                     .service(get_hosts)

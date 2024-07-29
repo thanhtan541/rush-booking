@@ -74,7 +74,7 @@ async fn add_new_room_to_a_hotel_should_success() {
     });
     let response = app.post_hosts(&body_for_host).await;
     assert!(response.status().is_success());
-    let host_json = get_response_data_from_json(response).await;
+    let host_json = get_response_data_from_json::<Uuid>(response).await;
     let body = serde_json::json!({
         "name":"Single bed room",
         "description":"Single beds room with private pool",
@@ -84,7 +84,7 @@ async fn add_new_room_to_a_hotel_should_success() {
 
     let response = app.post_rooms(&body).await;
     assert!(response.status().is_success());
-    let room_json = get_response_data_from_json(response).await;
+    let room_json = get_response_data_from_json::<Uuid>(response).await;
     assert!(room_json
         .message
         .as_str()
