@@ -60,11 +60,13 @@ async fn run(
     let db_pool = Data::new(db_pool);
     let server = HttpServer::new(move || {
         let cors = Cors::default()
+            //Todo: Put to confguration
             .allowed_origin("http://localhost:8080")
+            .allowed_origin("http://127.0.0.1:8080")
             // .allowed_origin_fn(|origin, _req_head| {
             //     origin.as_bytes().ends_with(b".rust-lang.org")
             // })
-            // .allowed_methods(vec!["GET", "POST"])
+            .allowed_methods(vec!["GET", "POST", "OPTIONS"])
             // .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
             // .allowed_header(http::header::CONTENT_TYPE)
             .max_age(3600);
