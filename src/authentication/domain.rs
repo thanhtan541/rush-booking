@@ -8,6 +8,16 @@ pub const DEFAULT_TOKEN_TYPE: &str = "JWT";
 pub const DEFAULT_TOKEN_TTL: u64 = 3600; // One hour
 
 #[derive(Deserialize, Serialize)]
+pub struct JwtResponse {
+    pub token_type: String,
+    pub scope: String,
+    pub access_token: String,
+    pub refresh_token: String,
+    pub id_token: String,
+    pub expires_in: u16,
+}
+
+#[derive(Deserialize, Serialize)]
 pub struct Header {
     pub alg: String,
     pub typ: String,

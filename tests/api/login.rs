@@ -1,3 +1,4 @@
+use rush_booking::authentication::JwtResponse;
 use uuid::Uuid;
 
 use crate::helpers::{get_response_data_from_json, spawn_app};
@@ -68,9 +69,6 @@ async fn reponse_payload_has_token_after_login_success() {
     let response = app.post_login(&body).await;
 
     assert!(response.status().is_success());
-    let room_json = get_response_data_from_json::<String>(response).await;
-    assert!(room_json
-        .message
-        .as_str()
-        .contains("Successfully fetch token"));
+    let login_resp: JwtResponse = response.json().await.unwrap();
+    assert!(login_resp.access_token.as_str().contains("access_token"));
 }

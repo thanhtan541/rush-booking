@@ -7,7 +7,7 @@ use secrecy::Secret;
 use sqlx::PgPool;
 
 use crate::{
-    authentication::{validate_credentials, AuthError, Credentials},
+    authentication::{validate_credentials, AuthError, Credentials, JwtResponse},
     domain::CustomerEmail,
     utils::{error_chain_fmt, ResponseData},
 };
@@ -56,10 +56,13 @@ pub async fn login(
     match validate_credentials(credentials, &pool).await {
         Ok(user_id) => {
             tracing::Span::current().record("user_id", &tracing::field::display(&user_id));
-            let data = ResponseData {
-                data: "token",
-                code: StatusCode::OK.as_u16(),
-                message: format!("Successfully fetch token"),
+            let data = JwtResponse {
+                token_type: "Bearer".into(),
+                scope: "list of scopes separated by space".into(),
+                refresh_token: "refresh_token".into(),
+                access_token: "access_token".into(),
+                id_token: "id_token".into(),
+                expires_in: 4799,
             };
 
             Ok(HttpResponse::Ok()
