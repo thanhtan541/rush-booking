@@ -23,7 +23,7 @@ cov:
 lint-check: check
 	cargo clippy -- -D warnings
 
-# rustup component add rustfmt
+# rustup component add rustfmt, for CI pipeline
 fmt-check:
 	cargo fmt -- --check
 
@@ -48,6 +48,10 @@ test-log:
 	export RUST_LOG="sqlx=error,info"
 	export TEST_LOG=true
 	cargo test ${PATTERN} | bunyan
+
+show-todos:
+	grep -rni ./src -e 'todo'
+	grep -rni ./tests -e 'todo'
 
 # slqx cli is requied
 # cargo install --version="~0.7" sqlx-cli --no-default-features \
