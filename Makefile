@@ -79,10 +79,10 @@ scan:
 	cargo +nightly udeps
 
 docker-build:
-	docker build --tag zero2prod --file Dockerfile .
+	docker build --tag rush_booking --file Dockerfile .
 
 docker-run:
-	docker run -p 8000:8000 zero2prod
+	docker run -p 8000:8000 rush_booking
 
 # Install Digital ocean's cli
 # brew install doctl
