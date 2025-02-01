@@ -73,3 +73,8 @@ fake = "~2.3"
 # Data for table-testing
 quickcheck = "0.9.2"
 quickcheck_macros = "0.9.1"
+
+[[test]]
+name = "custom"
+path = "tests/custom.rs"
+harness = false
