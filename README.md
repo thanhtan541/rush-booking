@@ -44,6 +44,18 @@ You can run tests using the following command:
 cargo test
 ```
 
+### Generate code reports
+
+You can run code reports using the following command:
+
+```bash
+./scripts/init_code_report_cov.sh
+```
+
+Send reports to sonarqube local
+- [Check this](./sonarqube-local/README.md)
+
+
 ### F.A.Qs
 1. Fix `too many open files` error on MacOS
 ```bash

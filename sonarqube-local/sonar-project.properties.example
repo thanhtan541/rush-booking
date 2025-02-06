@@ -1,0 +1,3 @@
+sonar.sources=.
+community.rust.clippy.reportPaths=clippy.json
+community.rust.lcov.reportPaths=lcov.info
