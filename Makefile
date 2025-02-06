@@ -104,3 +104,11 @@ cloud-apps-db-migrate:
 # JWT
 jwt-keypair:
 	./scripts/init_jwt_keypair.sh
+
+# This command is used to fix the error
+# thread 'actix-rt:worker' panicked at
+# 'Can not create Runtime: Os { code: 24, kind: Other, message: "Too many open files" }',
+#  limit enforced by the operating system on the maximum number of open file descriptors
+# (including sockets) for each process
+extend-open-files:
+	ulimit -n 1000
