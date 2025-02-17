@@ -5,6 +5,7 @@ set -eo pipefail
 
 if ! [ -x "$(command -v psql)" ]; then
   echo >&2 "Error: psql is not installed."
+  echo >&2 "Use: brew install libpq"
   exit 1
 fi
 
