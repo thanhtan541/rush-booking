@@ -21,3 +21,41 @@ fn clone_on_write() {
 
     assert_eq!(input, ['a', 'd', 'c']);
 }
+
+pub struct Immutable<T>(T);
+
+impl<T> Copy for Immutable<T> where T: Copy {}
+
+impl<T> std::ops::Deref for Immutable<T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+pub struct Config {
+    pub base_url: String,
+}
+
+impl Config {
+    pub fn build(self) -> Immutable<Config> {
+        Immutable(self)
+    }
+}
+
+#[test]
+fn deactivating_mutability() {
+    let mut config = Config {
+        base_url: "https://example.com".to_string(),
+    };
+    config.base_url = "https://example.com".to_string();
+
+    let immutable_config = config.build();
+
+    println!("immutable_config.base_url: {}", immutable_config.base_url);
+
+    let mut mutable_config = immutable_config;
+    // Cannot assign
+    mutable_config.base_url = "https://example.com".to_string();
+}
