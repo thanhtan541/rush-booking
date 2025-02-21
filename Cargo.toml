@@ -78,3 +78,7 @@ quickcheck_macros = "0.9.1"
 name = "custom"
 path = "tests/custom.rs"
 harness = false
+
+[[bench]]
+name = "my_benchmark"
+harness = true

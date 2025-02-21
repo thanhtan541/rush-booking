@@ -112,3 +112,6 @@ jwt-keypair:
 # (including sockets) for each process
 extend-open-files:
 	ulimit -n 1000
+
+cargo-bench:
+	cargo +nightly bench
