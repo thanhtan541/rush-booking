@@ -10,6 +10,10 @@ path = "src/lib.rs"
 path = "src/main.rs"
 name = "rush_booking"
 
+[[bin]]
+name = "init_data"
+path = "src/bin/init_data.rs"
+
 [dependencies]
 # Async runtime
 tokio = { version = "1.38.0", features = ["macros", "rt-multi-thread"] }
@@ -44,6 +48,9 @@ ring = "0.17.8"
 sha2 = "0.10"
 hmac = { version = "0.12", features = ["std"] }
 argon2 = { version = "0.4", features = ["std"] }
+clap = { version = "4.5.17", features = ["derive"] }
+ed25519-dalek = { version = "2.1", features = ["rand_core"] }
+bs58 = "0.5.1"
 
 # Database connection
 [dependencies.sqlx]
